@@ -2,9 +2,16 @@ import sys
 from lxml import etree
 import logging
 import argparse
-
+import datetime
 
 from helpers import api
+
+def creds_expire_days_warning():
+    creds = api.VeracodeAPI().get_creds()
+    exp = datetime.datetime.strptime(creds['expiration_ts'], "%Y-%m-%dT%H:%M:%S.%f%z")
+    delta = exp - datetime.datetime.now().astimezone() #we get a datetime with timezone...
+    if (delta.days < 7):
+        print('These API credentials expire ', creds['expiration_ts'])
 
 def process_app(the_app_id):
     data2 = api.VeracodeAPI().get_sandbox_list(the_app_id)
@@ -63,6 +70,9 @@ def main():
                         datefmt='%m/%d/%Y %I:%M:%S%p',
                         level=logging.INFO)
 
+    # CHECK FOR CREDENTIALS EXPIRATION
+    creds_expire_days_warning()
+    
     if all_apps == "true":
 
         data = api.VeracodeAPI().get_apps()
