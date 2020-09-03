@@ -4,17 +4,17 @@ import logging
 import argparse
 import datetime
 
-from helpers import api
+from veracode_api_py import VeracodeAPI as vapi
 
 def creds_expire_days_warning():
-    creds = api.VeracodeAPI().get_creds()
+    creds = vapi().get_creds()
     exp = datetime.datetime.strptime(creds['expiration_ts'], "%Y-%m-%dT%H:%M:%S.%f%z")
     delta = exp - datetime.datetime.now().astimezone() #we get a datetime with timezone...
     if (delta.days < 7):
         print('These API credentials expire ', creds['expiration_ts'])
 
 def process_app(the_app_id):
-    data2 = api.VeracodeAPI().get_sandbox_list(the_app_id)
+    data2 = vapi().get_sandbox_list(the_app_id)
 
     if len(data2)==0:
         return 0
@@ -43,7 +43,7 @@ def process_app(the_app_id):
             continue #don't set auto_recreate again
         
         print("Updating auto_recreate for sandbox ",sandbox_name,", sandbox id", sandbox_id)
-        updated = api.VeracodeAPI().update_sandbox(sandbox_id,"autorecreate",True)
+        updated = vapi().update_sandbox(sandbox_id,"autorecreate",True)
         if updated==None:
             return 0    #something went wrong
 
@@ -75,7 +75,7 @@ def main():
     
     if all_apps == "true":
 
-        data = api.VeracodeAPI().get_apps()
+        data = vapi().get_apps()
 
         for app in data:
             iterations = process_app(app["id"])
