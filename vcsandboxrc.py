@@ -11,7 +11,7 @@ def creds_expire_days_warning():
     exp = datetime.datetime.strptime(creds['expiration_ts'], "%Y-%m-%dT%H:%M:%S.%f%z")
     delta = exp - datetime.datetime.now().astimezone() #we get a datetime with timezone...
     if (delta.days < 7):
-        print('These API credentials expire ', creds['expiration_ts'])
+        print('These API credentials expire {}'.format(creds['expiration_ts']))
 
 def process_app(the_app_id):
     data2 = vapi().get_sandbox_list(the_app_id)
@@ -29,7 +29,7 @@ def process_app(the_app_id):
     else:
         count_noun = "sandboxes"
 
-    print("app_id",sandbox_list.get('app_id'),"has",sandbox_count,count_noun)
+    print("app_id {} has {} {}".format(sandbox_list.get('app_id'),sandbox_count,count_noun))
     iteration = 0
     for sandbox in sandbox_list:
         sandbox_name = sandbox.get('sandbox_name')
@@ -42,13 +42,13 @@ def process_app(the_app_id):
         if auto_recreate == 'true':
             continue #don't set auto_recreate again
         
-        print("Updating auto_recreate for sandbox ",sandbox_name,", sandbox id", sandbox_id)
+        print("Updating auto_recreate for sandbox {}, sandbox id {}".format(sandbox_name,sandbox_id))
         updated = vapi().update_sandbox(sandbox_id,"autorecreate",True)
         if updated==None:
             return 0    #something went wrong
 
         updated_xml = etree.fromstring(updated)
-        print('==>Sandbox',sandbox_name,'auto_recreate = ', updated_xml.get('auto_recreate'))
+        print('==>Sandbox {} auto_recreate = {}'.format(sandbox_name,updated_xml.get('auto_recreate')))
 
         iteration += 1
 
@@ -80,11 +80,11 @@ def main():
         for app in data:
             iterations = process_app(app["id"])
             if iterations > 0:
-                print("==>Updated",iterations,"sandboxes")
+                print("==>Updated {} sandboxes".format(iterations))
     else:
         iterations = process_app(target_app)
         if iterations > 0:
-            print("==>Updated",iterations,"sandboxes")
+            print("==>Updated {} sandboxes".format(iterations))
 
 if __name__ == '__main__':
     main()
